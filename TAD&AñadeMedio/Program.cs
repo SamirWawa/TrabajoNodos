@@ -36,7 +36,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
     }
     public ListaDoblementeEnlazada(IEnumerable<T> secuencia)
     {
-        foreach(T Dato in secuencia)
+        foreach (T Dato in secuencia)
         {
             AñadeAlFinal();
         }
@@ -54,9 +54,9 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
             u.Dispose();
     }
 
-    public IEnumerator<T> GetEnumerator()=>new Enumerador(Primero);
+    public IEnumerator<T> GetEnumerator() => new Enumerador(Primero);
 
-    IEnumerator IEnumerable.GetEnumerator()=>GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private class Enumerador : IEnumerator<T>, IDisposable
     {
@@ -67,8 +67,8 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
 
         public Enumerador(NodoListaDoblementeEnlazada<T>? primero)
         {
-            Primero = primero;                
-            Reset(); // Debe hacer el reset en el constructor.
+            Primero = primero;
+            Reset();
         }
 
         public void Reset() => It = null;
@@ -78,9 +78,9 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         object IEnumerator.Current => Current;
 
         public bool MoveNext()
-        {   
+        {
             bool puedoIterar = It == null && Primero != null || It != null && It.Siguiente != null;
-            if (puedoIterar) It = It == null ? Primero : It.Siguiente;                
+            if (puedoIterar) It = It == null ? Primero : It.Siguiente;
             return puedoIterar;
         }
         public void Dispose()
@@ -89,6 +89,49 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
             It = null;
         }
     }
+    void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
+    {
+        nuevo.Siguiente = nodo.Siguiente;
+        nuevo.Anterior = nodo;
+        if (Longitud == 0)
+        {
+            Ultimo = nuevo;
+        }
+        Longitud++;
+    }
+    void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
+    {
+        NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
+        nuevo.Siguiente = nodo.Siguiente;
+        nuevo.Anterior = nodo;
+        if (Longitud == 0)
+        {
+            Ultimo = nuevo;
+        }
+        Longitud++;
+    }
+    void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
+    {
+        nuevo.Anterior = nodo.Anterior;
+        nuevo.Siguiente = nodo;
+        if (Longitud == 0)
+        {
+            Ultimo = nuevo;
+        }
+        Longitud++;
+    }
+    void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
+    {
+        NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
+        nuevo.Anterior = nodo.Anterior;
+        nuevo.Siguiente = nodo;
+        if (Longitud == 0)
+        {
+            Ultimo = nuevo;
+        }
+        Longitud++;
+    }
+
 }
 
 internal class Program
