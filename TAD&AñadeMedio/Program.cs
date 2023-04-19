@@ -89,6 +89,49 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
             It = null;
         }
     }
+    public void AñadeAlPrincipio(NodoListaDoblementeEnlazada<T> nuevo)
+    {
+        nuevo.Siguiente = Primero;
+        nuevo.Anterior = null;
+        Primero.Anterior = nuevo;
+        Primero = nuevo;
+        if (Longitud == 0) Ultimo = nuevo;
+        Longitud++;
+    }
+    public void AñadeAlPrincipio(T dato)
+    {
+        NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
+        nuevo.Siguiente = Primero;
+        nuevo.Anterior = null;
+        Primero.Anterior = nuevo;
+        Primero = nuevo;
+        if (Longitud == 0) Ultimo = nuevo;
+        Longitud++;
+
+    }
+    public void AñadeAlFinal(NodoListaDoblementeEnlazada<T> nuevo)
+    {
+        if (Longitud == 0)
+            Primero = nuevo;
+        else
+            Ultimo!.Siguiente = nuevo;
+        nuevo.Anterior = Ultimo;
+        Ultimo.Siguiente = nuevo;
+        Ultimo = nuevo;
+        Longitud++;
+    }
+    public void AñadeAlFinal(T dato)
+    {
+        NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
+        if (Longitud == 0)
+            Primero = nuevo;
+        else
+            Ultimo!.Siguiente = nuevo;
+        nuevo.Anterior = Ultimo;
+        Ultimo.Siguiente = nuevo;
+        Ultimo = nuevo;
+        Longitud++;
+    }
     void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
     {
         nuevo.Siguiente = nodo.Siguiente;
