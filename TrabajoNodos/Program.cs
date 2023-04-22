@@ -1,4 +1,9 @@
 ﻿using System.Collections;
+using System.Text;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Linq;
+using System.Threading;
 
 public class NodoListaDoblementeEnlazada<T> : IDisposable where T : IComparable<T>
 {
@@ -24,6 +29,10 @@ public class NodoListaDoblementeEnlazada<T> : IDisposable where T : IComparable<
 
 class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : IComparable<T>
 {
+    class ListaException : Exception
+        {
+            public ListaException(string message) : base(message) { }
+        }
     public NodoListaDoblementeEnlazada<T>? Primero { get; private set; }
     public NodoListaDoblementeEnlazada<T>? Ultimo { get; private set; }
     public int Longitud { get; private set; }
@@ -53,6 +62,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         if (Ultimo is IDisposable u)
             u.Dispose();
     }
+    public void Clear() => Dispose();
 
     public IEnumerator<T> GetEnumerator() => new Enumerador(Primero);
 
@@ -132,7 +142,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         Ultimo = nuevo;
         Longitud++;
     }
-    void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
+    public void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
     {
         nuevo.Siguiente = nodo.Siguiente;
         nuevo.Anterior = nodo;
@@ -142,7 +152,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         }
         Longitud++;
     }
-    void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
+    public void AñadeDespuesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
     {
         NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
         nuevo.Siguiente = nodo.Siguiente;
@@ -153,7 +163,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         }
         Longitud++;
     }
-    void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
+    public void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, NodoListaDoblementeEnlazada<T> nuevo)
     {
         nuevo.Anterior = nodo.Anterior;
         nuevo.Siguiente = nodo;
@@ -163,7 +173,7 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         }
         Longitud++;
     }
-    void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
+    public void AñadeAntesDe(NodoListaDoblementeEnlazada<T> nodo, T dato)
     {
         NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(dato);
         nuevo.Anterior = nodo.Anterior;
@@ -174,6 +184,67 @@ class ListaDoblementeEnlazada<T> : IDisposable, IEnumerable<T> where T : ICompar
         }
         Longitud++;
     }
+    public void Borra(NodoListaDoblementeEnlazada<T> nodo)
+        {
+            if (Longitud == 0)
+                throw new ListaException("Para borrar en una lista tiene que tener algún elemento.");
+            if (Longitud == 1)
+                Primero = Ultimo = null;
+            else if (Primero == nodo)
+            {
+                Primero = nodo.Siguiente;
+                nodo.Siguiente.Anterior = null;
+            }
+            else if (Ultimo == nodo)
+            {
+                Ultimo = nodo.Anterior;
+                nodo.Anterior.Siguiente = null;
+            }
+            else
+            {
+                NodoListaDoblementeEnlazada<T> a = Busca(nodo.Dato);
+                if (a == null)
+                    throw new Exception("El nodo a borrar no pertenece a la lista.");
+                a.Anterior.Siguiente = nodo.Siguiente;
+                a.Siguiente.Anterior = nodo.Anterior;
+            }
+            nodo.Siguiente = null;
+            nodo.Anterior = null;
+            Longitud--;
+        }
+        public void ImprimeLista(ListaDoblementeEnlazada<T> l)
+        {
+            foreach (var a in l)
+                Console.WriteLine(a);
+        }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (NodoListaDoblementeEnlazada<T>? n = Primero; n != null; n = n.Siguiente)
+            {
+                sb.Append($"[{n.ToString()}]");
+            }
+            sb.Append(" - ");
+            for (NodoListaDoblementeEnlazada<T>? n = Ultimo; n != null; n = n.Anterior)
+            {
+                sb.Append($"[{n.ToString()}]");
+            }
+            return new string(sb.ToString());
+        }
+        public void EditaNodo(T datoAnterior, T datoNuevo, string direccion)
+        {
+            NodoListaDoblementeEnlazada<T> nodo = Busca(datoAnterior);
+            if (nodo == null)
+                throw new Exception("El nodo a editar no pertenece a la lista.");
+            NodoListaDoblementeEnlazada<T> nuevo = new NodoListaDoblementeEnlazada<T>(datoNuevo);
+            nuevo.Anterior = nodo.Anterior;
+            if(nodo.Siguiente != null)
+            nodo.Siguiente.Anterior = nuevo;
+            if(nodo.Anterior != null)
+            nodo.Anterior.Siguiente = nuevo;
+            nodo = nuevo;
+        }
+        
 
 }
 
@@ -181,6 +252,27 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-
+        ListaDoblementeEnlazada<int> ld = new ListaDoblementeEnlazada<int>();
+            ld.AñadeAlPrincipio(4);
+            ld.AñadeAlPrincipio(3);
+            Console.WriteLine(ld);
+            Console.ReadLine();
+            ld.Clear();
+            ld.AñadeAlFinal(6);
+            ld.AñadeAlFinal(9);
+            ld.AñadeAlPrincipio(3);
+            Console.WriteLine(ld);
+            Console.ReadLine();
+            NodoListaDoblementeEnlazada<int> nodo = ld.Busca(6);
+            ld.AñadeAntesDe(nodo, 5);
+            ld.AñadeAntesDe(ld.Primero, 1);
+            ld.AñadeDespuesDe(nodo, 7);
+            ld.AñadeDespuesDe(ld.Ultimo, 12);
+            Console.WriteLine(ld);
+            ld.Borra(nodo);
+            ld.Borra(ld.Primero);
+            ld.Borra(ld.Ultimo);
+            Console.WriteLine(ld);
+            Console.ReadLine();
     }
 }
